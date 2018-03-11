@@ -25,13 +25,13 @@ class UberHomeActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_uber_helper)
 
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = getString(R.string.title_activity_uber_home)
 
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
         container.adapter = mSectionsPagerAdapter
@@ -58,7 +58,7 @@ class UberHomeActivity : AppCompatActivity() {
 
         override fun getItem(position: Int): Fragment {
             return when (position) {
-                0 -> UberMainFragment.newInstance()
+                0 -> UberMainFragment.newInstance(null)
                 1 -> UberSettingFragment.newInstance()
                 else -> throw IllegalStateException("This tab implementation does not exist")
             }

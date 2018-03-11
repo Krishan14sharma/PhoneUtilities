@@ -10,6 +10,7 @@ import homeAddress
 import kotlinx.android.synthetic.main.fragment_uber_main.*
 import kr.ifttutilities.AppPreferenceManager
 import kr.ifttutilities.R
+import kr.ifttutilities.uber.UberShortcutActivity
 import kr.ifttutilities.uber.getUberPoolProductId
 import officeAddress
 
@@ -19,7 +20,7 @@ import officeAddress
 class UberMainFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_uber_main, container, false)
+                              savedInstanceState: Bundle?): View = inflater.inflate(R.layout.fragment_uber_main, container, false)
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -38,17 +39,52 @@ class UberMainFragment : Fragment() {
                 .setDropoffLocation(homeAddress.lat, homeAddress.lng, "Home", "SerenityLayout, Sarjapur fire station, Bangalore")
                 .build()
 
+        val rideParamsToHome = RideParameters.Builder()
+                .setProductId(poolProductId)
+                .setPickupToMyLocation()
+                .setDropoffLocation(homeAddress.lat, homeAddress.lng, "Home", "SerenityLayout, Sarjapur fire station, Bangalore")
+                .build()
 
+        //todo instead of three button just use one
         requestButtonHomeToWork.setRideParameters(rideParamsHomeToWork)
         requestButtonWorkToHome.setRideParameters(rideParamsWorkToHome)
+        requestButtonToHome.setRideParameters(rideParamsToHome)
+
+        arguments?.getString(EXTRAS_ACTION_KEY)?.let {
+            if (it == UberShortcutActivity.ACTION_HOME_TO_WORK) {
+                requestButtonHomeToWork.performClick()
+                activity.finish()
+            } else if (it == UberShortcutActivity.ACTION_WORK_TO_HOME) {
+                requestButtonWorkToHome.performClick()
+                activity.finish()
+            } else {
+                requestButtonToHome.performClick()
+                activity.finish()
+            }
+        }
+
+        workToHomebutton.setOnClickListener {
+            requestButtonWorkToHome.performClick()
+        }
+
+        homeToWorkButton.setOnClickListener {
+            requestButtonHomeToWork.performClick()
+        }
+
+        toHomebutton.setOnClickListener {
+            requestButtonToHome.performClick()
+        }
+
     }
 
 
     companion object {
-        fun newInstance(): UberMainFragment {
+        private const val EXTRAS_ACTION_KEY = "action"
+        fun newInstance(action: String?): UberMainFragment {
             val fragment = UberMainFragment()
-            val args = Bundle()
-            fragment.arguments = args
+            action?.let {
+                fragment.arguments = Bundle().also { it.putString(EXTRAS_ACTION_KEY, action) }
+            }
             return fragment
         }
     }

@@ -22,16 +22,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsActivity" />
         <activity
             android:name=".uber.UberHomeActivity"
-            android:label="@string/title_activity_uber_helper"
+            android:label="@string/title_activity_uber_home"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="kr.ifttutilities.MainActivity" />
         </activity>
+        <activity
+            android:name=".uber.UberShortcutActivity"
+            android:theme="@style/styleUberEmpty" />
     </application>
 
 </manifest>
