@@ -17,17 +17,15 @@ object OtpAnalyzer {
 
     @JvmStatic
     fun analyze(message: String): Pair<Boolean, String> {
-        return when {
-            isGoogleVerificationCode(message) || isOtherOtp(message) -> {
-                val matcher = otpPattern.matcher(message)
-                return if (matcher.find()) {
-                    Pair(true, matcher.group(1))
-                } else Pair(false, "")
-            }
-            else -> Pair(false, "")
-        }
-    }
+        return if (isGoogleVerificationCode(message) || isOtherOtp(message)) {
+            val matcher = otpPattern.matcher(message)
+            return if (matcher.find()) {
+                Pair(true, matcher.group(1))
+            } else Pair(false, "")
+        } else
+            Pair(false, "")
 
+    }
 
     private fun isOtherOtp(message: String) = message.contains("OTP", true)
 
