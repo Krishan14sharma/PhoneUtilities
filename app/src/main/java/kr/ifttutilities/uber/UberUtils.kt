@@ -13,7 +13,7 @@ object UberUtils {
     private const val redirectUri = "app://kr.iftt"
     // todo hide this secrets
     private const val clientId = "6RmHtzO5rvg1SbevhUo77odrEysAzCLK"
-    const val accessToken = "KA.eyJ2ZXJzaW9uIjoyLCJpZCI6InIwVFZ2ZE81UWtPTDVNV2Fnd29pTGc9PSIsImV4cGlyZXNfYXQiOjE1MjMxODMyNjYsInBpcGVsaW5lX2tleV9pZCI6Ik1RPT0iLCJwaXBlbGluZV9pZCI6MX0.jr-llu1PshubppmIdwnxAp-Ng976uMEekiFdTezpNJA"
+    const val accessToken = "KA.eyJ2ZXJzaW9uIjoyLCJpZCI6IkJuL1g0bWJQVHVxN2ZWUExkdkRSNGc9PSIsImV4cGlyZXNfYXQiOjE1MjM2MTcwNDMsInBpcGVsaW5lX2tleV9pZCI6Ik1RPT0iLCJwaXBlbGluZV9pZCI6MX0.FtULoui9-KxdvO4iklbv3NfmX-3JoBUuERzJg-O1cgk"
 
     @JvmStatic
     fun getUberSessionConfiguration(): SessionConfiguration {

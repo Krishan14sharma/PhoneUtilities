@@ -2,6 +2,7 @@ package kr.ifttutilities.uber.main
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +27,7 @@ class UberMainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // preferred choice of uber product
         val poolProductId = AppPreferenceManager.getInstance(activity).getUberPoolProductId()
-
+        Log.d("product_id", poolProductId)
         val rideParamsHomeToWork = RideParameters.Builder()
                 .setProductId(poolProductId)
                 .setPickupLocation(homeAddress.lat, homeAddress.lng, "Home", "SerenityLayout, Sarjapur fire station, Bangalore")

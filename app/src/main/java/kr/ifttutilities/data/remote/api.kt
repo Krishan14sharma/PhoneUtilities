@@ -25,6 +25,8 @@ interface Api {
             @Query("latitude") latitude: String,
             @Query("longitude") longitude: String): Single<ProductWrapper>
 
+    @GET("https://safe-reef-16696.herokuapp.com/ifttt/terminal/speak")
+    fun sendTerminalMessage(@Query("message") message: String): Single<String>
 
     companion object {
         private const val ENDPOINT = "https://api.uber.com"

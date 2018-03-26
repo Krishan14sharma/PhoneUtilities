@@ -35,5 +35,14 @@
         <item name="android:layout_marginTop">8dp</item>
     </style>
 
+    <style name="mainButtonStyle">
+        <item name="android:layout_width">96dp</item>
+        <item name="android:layout_height">96dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+
 
 </resources>
