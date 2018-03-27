@@ -67,7 +67,7 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
 
     private val scanCallback = BluetoothAdapter.LeScanCallback { device, p1, p2 ->
         Log.d(TAG, device.address)
-        if (device.address == "F3:BE:78:E5:71:71") {
+        if (device.address == BAND_REMOTE_ADDRESS) {
             // todo save in preference or something
             stopScan()
             Log.d(TAG, "device found starting service")
@@ -78,7 +78,7 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
     private fun startScan() {
         if (!scanning && hasPermissions()) {
             Log.d(TAG, "starting scan all permissions acquired")
-            val filter = adapter?.bondedDevices?.filter { it.address == "F3:BE:78:E5:71:71" }
+            val filter = adapter?.bondedDevices?.filter { it.name.startsWith("Mi Band") }
             if (filter == null || filter.isEmpty()) {
                 adapter?.startLeScan(scanCallback)
                 scanHandler = Handler().also { it.postDelayed({ stopScan() }, SCAN_PERIOD_MILLIS) }

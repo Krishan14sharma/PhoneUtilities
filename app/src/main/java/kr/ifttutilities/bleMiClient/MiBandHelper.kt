@@ -3,7 +3,6 @@ package kr.ifttutilities.bleMiClient
 import android.bluetooth.*
 import android.content.Context
 import android.util.Log
-import java.util.*
 
 /**
  * Created by krishan on 24/03/18.
@@ -14,19 +13,14 @@ class MiBandHelper(val context: Context) : BluetoothGattCallback() {
     private val TAG = "MiBandHelper"
     private var gatt: BluetoothGatt? = null
 
-    val alertMessageUUID = UUID.fromString("00001811-0000-1000-8000-00805f9b34fb")
-    val newAlertCharacteristicUUID = UUID.fromString("00002a46-0000-1000-8000-00805f9b34fb")
-    val sendMessageAlertProtocol = byteArrayOf(0x05, 0x01)
-
     init {
         val bluetoothManager: BluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         adapter = bluetoothManager.adapter
     }
 
     fun connectBand() {
-        adapter.getRemoteDevice("F3:BE:78:E5:71:71")
+        adapter.getRemoteDevice(BAND_REMOTE_ADDRESS)
                 .connectGatt(context, true, this)
-
     }
 
     override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
@@ -52,18 +46,13 @@ class MiBandHelper(val context: Context) : BluetoothGattCallback() {
     }
 
     fun sendMessageNotification(message: String) {
-        val characteristic = gatt?.getService(alertMessageUUID)?.getCharacteristic(newAlertCharacteristicUUID)
-        characteristic?.value = byteArrayOf(*sendMessageAlertProtocol).plus(message.toByteArray())
-        //        characteristic.value = byteArrayOf(0x05, 0x00, 0x48, 0x69)// to send hi as a message
+        val characteristic = gatt?.getService(alertMessageServiceUUID)?.getCharacteristic(newAlertCharacteristicUUID)
+        characteristic?.value = byteArrayOf(*sendMessageAlertProtocolHeader).plus(message.toByteArray())
         val b = gatt?.writeCharacteristic(characteristic)
         Log.d(TAG, b.toString())
     }
 
-    //    00001811-0000-1000-8000-00805f9b34fb
-    //    00002a46-0000-1000-8000-00805f9b34fb
-    //    00002a44-0000-1000-8000-00805f9b34fb    ---->00002902-0000-1000-8000-00805f9b34fb
     fun disconnect() {
-
+        gatt?.close()
     }
-
 }

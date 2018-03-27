@@ -26,12 +26,16 @@ class IfttNotificationListenerService : NotificationListenerService(), TtsServic
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         super.onNotificationPosted(sbn)
         val text = sbn.notification.extras?.getString("android.text")
-        messageToSpeak = if (isTtsInitialised) {
-            tts.speak(text)
-            ""
-        } else {
-            text.toString()
+        if (sbn.packageName == "com.ubercab") {
+            // todo send uber arriving message to band
         }
+
+//        messageToSpeak = if (isTtsInitialised) {
+//            tts.speak(text)
+//            ""
+//        } else {
+//            text.toString()
+//    }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
