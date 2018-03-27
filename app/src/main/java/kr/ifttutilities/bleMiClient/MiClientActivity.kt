@@ -22,8 +22,7 @@ import kr.ifttutilities.toast
 
 
 class MiClientActivity : AppCompatActivity(), ServiceConnection {
-    private var adapter: BluetoothAdapter? = null
-
+    private lateinit var adapter: BluetoothAdapter
     private var scanHandler: Handler? = null
     private val REQUEST_ENABLE_BT = 100
     private val REQUEST_ENABLE_FINE_LOCATION = 101
@@ -37,14 +36,22 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mi_client)
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            toast("Feature not supported")
+            finish()
+        }
+
+        //todo write a message about bonded device condition
+
         connectButton.setOnClickListener {
-            if (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-                toast("Feature not supported")
-                finish()
-            }
             val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             adapter = bluetoothManager.adapter
-            startScan()
+            if (checkForBondedMiBandDevice()) {
+                Log.d(TAG, "device found starting service")
+                startUtilityService()
+            } else {
+                //todo write a message about bonded device condition
+            }
         }
 
         buttonTest.setOnClickListener {
@@ -53,6 +60,10 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
         buttonDisconnect.setOnClickListener {
             miService?.disconnect()
         }
+    }
+
+    private fun checkForBondedMiBandDevice(): Boolean {
+        return adapter.bondedDevices?.any { it.name.startsWith("Mi Band") } ?: false
     }
 
     override fun onServiceDisconnected(p0: ComponentName?) {
