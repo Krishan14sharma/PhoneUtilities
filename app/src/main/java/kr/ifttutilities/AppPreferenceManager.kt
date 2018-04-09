@@ -11,7 +11,7 @@ class AppPreferenceManager private constructor(val sharedPreferences: SharedPref
     val PREF_READ_NOTIFICATION_LOUD = "pref_read_notification_loud"
 
     companion object {
-        const private val preferenceName = "kr.ifttutilities"
+        private const val preferenceName = "kr.ifttutilities"
         @Volatile
         private var INSTANCE: AppPreferenceManager? = null
 

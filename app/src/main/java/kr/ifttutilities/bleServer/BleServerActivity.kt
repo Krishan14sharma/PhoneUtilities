@@ -23,7 +23,7 @@ import kr.ifttutilities.toast
 class BleServerActivity : AppCompatActivity() {
 
     private var scanning: Boolean = false
-    private val REQUEST_ENABLE_BT = 100
+    private val REQUEST_ENABLE_BT = 1007
     private val REQUEST_ENABLE_FINE_LOCATION = 101
     private val SCAN_PERIOD_MILLIS: Long = 5000
 

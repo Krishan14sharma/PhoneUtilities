@@ -1,9 +1,12 @@
 package kr.ifttutilities.notification
 
+import android.content.Intent
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.support.annotation.RequiresApi
+import kr.ifttutilities.bleMiClient.ACTION_SEND_DATA
+import kr.ifttutilities.bleMiClient.EXTRA_MESSAGE
 import kr.ifttutilities.tts.TtsService
 
 
@@ -28,6 +31,7 @@ class IfttNotificationListenerService : NotificationListenerService(), TtsServic
         val text = sbn.notification.extras?.getString("android.text")
         if (sbn.packageName == "com.ubercab") {
             // todo send uber arriving message to band
+            handleUber(text)
         }
 
 //        messageToSpeak = if (isTtsInitialised) {
@@ -36,6 +40,13 @@ class IfttNotificationListenerService : NotificationListenerService(), TtsServic
 //        } else {
 //            text.toString()
 //    }
+    }
+
+    private fun handleUber(text: String?) {
+        if (text == null) return
+        if (text.contains("Arriving soon")) {
+            sendBroadcast(Intent(ACTION_SEND_DATA).also { it.putExtra(EXTRA_MESSAGE, "Cab arriving") })
+        }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {

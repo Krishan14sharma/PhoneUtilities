@@ -10,25 +10,21 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import kotlinx.android.synthetic.main.activity_mi_client.*
+import kr.ifttutilities.AppPreferenceManager
 import kr.ifttutilities.R
 import kr.ifttutilities.toast
 
 
 class MiClientActivity : AppCompatActivity(), ServiceConnection {
     private lateinit var adapter: BluetoothAdapter
-    private var scanHandler: Handler? = null
     private val REQUEST_ENABLE_BT = 100
-    private val REQUEST_ENABLE_FINE_LOCATION = 101
     private val REQUEST_ENABLE_READ_SMS = 102
-    private val SCAN_PERIOD_MILLIS: Long = 10000
-    private var scanning = false
     private val TAG = "MiClientActivity"
     private var miService: MiClientUtilitiesService? = null
     private var isMiServiceConnected = false
@@ -36,22 +32,24 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mi_client)
+
         if (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            toast("Feature not supported")
+            toast(getString(R.string.feature_not_supported))
             finish()
         }
 
-        //todo write a message about bonded device condition
+        connectToServiceIfRunning()
 
+        adapter = (getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        getAllPermissions()
         connectButton.setOnClickListener {
-            val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            adapter = bluetoothManager.adapter
-            if (checkForBondedMiBandDevice()) {
-                Log.d(TAG, "device found starting service")
-                startUtilityService()
-            } else {
-                //todo write a message about bonded device condition
-            }
+            if (adapter.isEnabled && checkOtherPermissionsGranted()) {
+                if (checkForBondedMiBandDevice()) {
+                    startUtilityService()
+                } else {
+                    Snackbar.make(connectButton, getString(R.string.mi_band_connection_condition), Snackbar.LENGTH_LONG).show()
+                }
+            } else getAllPermissions()
         }
 
         buttonTest.setOnClickListener {
@@ -62,8 +60,25 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
         }
     }
 
+    private fun connectToServiceIfRunning() {
+        val serviceIntent = Intent(this, MiClientUtilitiesService::class.java)
+        bindService(serviceIntent, this, 0)
+    }
+
+    private fun enableBluetooth() {
+        if (!adapter.isEnabled) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+        }
+    }
+
     private fun checkForBondedMiBandDevice(): Boolean {
-        return adapter.bondedDevices?.any { it.name.startsWith("Mi Band") } ?: false
+        val device = adapter.bondedDevices?.find {
+            it.name.startsWith(BAND_NAME)
+        }?.also {
+            AppPreferenceManager.getInstance(this).setMiBandAddress(it.address)
+        }
+        return device != null
     }
 
     override fun onServiceDisconnected(p0: ComponentName?) {
@@ -76,62 +91,27 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
         miService = binder.getService()
     }
 
-    private val scanCallback = BluetoothAdapter.LeScanCallback { device, p1, p2 ->
-        Log.d(TAG, device.address)
-        if (device.address == BAND_REMOTE_ADDRESS) {
-            // todo save in preference or something
-            stopScan()
-            Log.d(TAG, "device found starting service")
-            startUtilityService()
-        }
-    }
-
-    private fun startScan() {
-        if (!scanning && hasPermissions()) {
-            Log.d(TAG, "starting scan all permissions acquired")
-            val filter = adapter?.bondedDevices?.filter { it.name.startsWith("Mi Band") }
-            if (filter == null || filter.isEmpty()) {
-                adapter?.startLeScan(scanCallback)
-                scanHandler = Handler().also { it.postDelayed({ stopScan() }, SCAN_PERIOD_MILLIS) }
-            } else {
-                Log.d(TAG, "device already bonded")
-                startUtilityService()
-            }
-        }
-    }
-
     private fun startUtilityService() {
         val serviceIntent = Intent(this, MiClientUtilitiesService::class.java)
         ContextCompat.startForegroundService(this, serviceIntent)
         bindService(serviceIntent, this, Context.BIND_AUTO_CREATE)
     }
 
-    private fun stopScan() {
-        adapter?.stopLeScan(scanCallback)
-        Log.d(TAG, "stopping scan")
+    private fun getAllPermissions() {
+        if (!adapter.isEnabled) {
+            enableBluetooth()
+        } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECEIVE_SMS), REQUEST_ENABLE_READ_SMS)
+        }
     }
 
-
-    private fun hasPermissions(): Boolean {
-        if (!adapter!!.isEnabled) {
-            return false
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), REQUEST_ENABLE_FINE_LOCATION)
-            return false
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECEIVE_SMS), REQUEST_ENABLE_READ_SMS)
-            return false
-        }
-        return true
+    private fun checkOtherPermissionsGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_ENABLE_FINE_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startScan()
-        } else if (requestCode == REQUEST_ENABLE_READ_SMS && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == REQUEST_ENABLE_READ_SMS && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
         }
     }
@@ -139,13 +119,12 @@ class MiClientActivity : AppCompatActivity(), ServiceConnection {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_OK) {
-            startScan()
+            getAllPermissions()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopScan()
         if (isMiServiceConnected)
             unbindService(this)
     }

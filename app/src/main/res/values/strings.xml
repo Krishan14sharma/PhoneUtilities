@@ -13,4 +13,6 @@
     <string name="get_uber_products">Get Uber Products</string>
     <string name="take_me_home">Take me Home</string>
     <string name="pin_shortcut_to_home">Pin shortcut To Home</string>
+    <string name="feature_not_supported">Feature not supported</string>
+    <string name="mi_band_connection_condition">Your Mi band should already be paired with this device and should have name starting with Mi band</string>
 </resources>

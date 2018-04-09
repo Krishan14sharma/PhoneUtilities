@@ -3,6 +3,7 @@ package kr.ifttutilities.bleMiClient
 import android.bluetooth.*
 import android.content.Context
 import android.util.Log
+import kr.ifttutilities.AppPreferenceManager
 
 /**
  * Created by krishan on 24/03/18.
@@ -19,7 +20,7 @@ class MiBandHelper(val context: Context) : BluetoothGattCallback() {
     }
 
     fun connectBand() {
-        adapter.getRemoteDevice(BAND_REMOTE_ADDRESS)
+        adapter.getRemoteDevice(AppPreferenceManager.getInstance(context).getMiBandAddress())
                 .connectGatt(context, true, this)
     }
 
